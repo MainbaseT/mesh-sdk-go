@@ -17,7 +17,7 @@ package asserter
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 
@@ -240,7 +240,7 @@ type Configuration struct {
 func NewClientWithFile(
 	filePath string,
 ) (*Asserter, error) {
-	content, err := ioutil.ReadFile(path.Clean(filePath))
+	content, err := os.ReadFile(path.Clean(filePath))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
 	}
@@ -374,7 +374,7 @@ func NewGenericRosettaClient(
 		ignoreRosettaSpecValidation: true,
 	}
 
-	//init default operation statuses for generic rosetta client
+	// init default operation statuses for generic rosetta client
 	InitOperationStatus(asserter)
 
 	return asserter, nil
@@ -438,7 +438,7 @@ func getValidationConfig(validationFilePath string) (*Validations, error) {
 		Enabled: false,
 	}
 	if validationFilePath != "" {
-		content, err := ioutil.ReadFile(path.Clean(validationFilePath))
+		content, err := os.ReadFile(path.Clean(validationFilePath))
 		if err != nil {
 			return nil, fmt.Errorf("failed to read file %s: %w", validationFilePath, err)
 		}

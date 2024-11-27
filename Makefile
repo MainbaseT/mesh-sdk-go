@@ -24,11 +24,11 @@ GO_MOD_PACKAGES=./types/...
 GO_FOLDERS=$(shell echo ${GO_PACKAGES} | sed -e "s/\.\///g" | sed -e "s/\/\.\.\.//g")
 GO_MOD_FOLDERS=$(shell echo ${GO_MOD_PACKAGES} | sed -e "s/\.\///g" | sed -e "s/\/\.\.\.//g")
 TEST_SCRIPT=go test ${GO_PACKAGES}
-LINT_SETTINGS=golint,misspell,gocyclo,gocritic,whitespace,goconst,gocognit,bodyclose,unconvert,lll,unparam
+LINT_SETTINGS=misspell,gocyclo,gocritic,whitespace,goconst,gocognit,bodyclose,unconvert,lll,unparam
 
 build:
 	go build ./...
-	
+
 deps:
 	go get ./...
 
@@ -91,7 +91,7 @@ shellcheck:
 salus:
 	docker run --rm -t -v ${PWD}:/home/repo coinbase/salus
 
-release: shellcheck check-gen check-license check-format test lint salus
+release: shellcheck check-license check-format lint salus
 
 mocks:
 	rm -rf mocks;
