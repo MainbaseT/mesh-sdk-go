@@ -1,4 +1,4 @@
-// Copyright 2025 Coinbase, Inc.
+// Copyright 2026 Coinbase, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,6 @@ const (
 	EcdsaRecovery   SignatureType = "ecdsa_recovery"
 	Ed25519         SignatureType = "ed25519"
 	Schnorr1        SignatureType = "schnorr_1"
-	SCHNORR_BIP340  SignatureType = "schnorr_bip340"
+	SchnorrBip340   SignatureType = "schnorr_bip340"
 	SchnorrPoseidon SignatureType = "schnorr_poseidon"
 )
