@@ -18,6 +18,8 @@ import (
 	"fmt"
 
 	zil_schnorr "github.com/Zilliqa/gozilliqa-sdk/schnorr"
+	btcec "github.com/btcsuite/btcd/btcec/v2"
+	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 
 	"github.com/coinbase/rosetta-sdk-go/asserter"
@@ -76,6 +78,23 @@ func (s *SignerSecp256k1) Sign(
 		if err != nil {
 			return nil, fmt.Errorf("failed to sign for %v: %w", types.Schnorr1, err)
 		}
+	case types.SchnorrBip340:
+		// BIP-340 Schnorr signing over secp256k1
+		// (https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki).
+		// payload.Bytes must be a 32-byte message hash.
+		// The signature is 64 bytes: r (32 bytes) || s (32 bytes).
+		if len(payload.Bytes) != 32 {
+			return nil, fmt.Errorf(
+				"SchnorrBip340 requires a 32-byte message hash, got %d bytes",
+				len(payload.Bytes),
+			)
+		}
+		privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes)
+		ecSig, signErr := schnorr.Sign(privKey, payload.Bytes)
+		if signErr != nil {
+			return nil, fmt.Errorf("failed to sign for %v: %w", types.SchnorrBip340, signErr)
+		}
+		sig = ecSig.Serialize() // 64 bytes: bytes(R.x) || bytes(s)
 	default:
 		return nil, fmt.Errorf(
 			"signature type %s is invalid: %w",
@@ -113,6 +132,27 @@ func (s *SignerSecp256k1) Verify(signature *types.Signature) error {
 		verify = secp256k1.VerifySignature(pubKey, message, normalizedSig)
 	case types.Schnorr1:
 		verify = zil_schnorr.VerifySignature(pubKey, message, sig)
+	case types.SchnorrBip340:
+		// BIP-340 Schnorr verification
+		// (https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki).
+		// pubKey must be a 33-byte compressed secp256k1 key.
+		parsedPubKey, parseErr := btcec.ParsePubKey(pubKey)
+		if parseErr != nil {
+			return fmt.Errorf(
+				"failed to parse public key for %v: %w",
+				types.SchnorrBip340,
+				parseErr,
+			)
+		}
+		ecSig, parseErr := schnorr.ParseSignature(sig)
+		if parseErr != nil {
+			return fmt.Errorf(
+				"failed to parse signature for %v: %w",
+				types.SchnorrBip340,
+				parseErr,
+			)
+		}
+		verify = ecSig.Verify(message, parsedPubKey)
 	default:
 		return fmt.Errorf(
 			"signature type %s is invalid: %w",

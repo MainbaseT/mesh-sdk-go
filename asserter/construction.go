@@ -400,7 +400,12 @@ func SignatureType(
 	signature types.SignatureType,
 ) error {
 	switch signature {
-	case types.Ecdsa, types.EcdsaRecovery, types.Ed25519, types.Schnorr1, types.SchnorrPoseidon:
+	case types.Ecdsa,
+		types.EcdsaRecovery,
+		types.Ed25519,
+		types.Schnorr1,
+		types.SchnorrPoseidon,
+		types.SchnorrBip340:
 		return nil
 	default:
 		return ErrSignatureTypeNotSupported
